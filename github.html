@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Futura 3D — Administration</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --tx: #16181d;
+      --mut: #5e6573;
+      --line: #dfe3eb;
+      --acc: #1d4ed8;
+      --acc-soft: #eef2ff;
+      --ok-bg: #ecfdf3;
+      --ok-tx: #15803d;
+      --warn-bg: #fffbeb;
+      --warn-tx: #b45309;
+      --bad-bg: #fef2f2;
+      --bad-tx: #b91c1c;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      line-height: 1.45;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+    .mut { color: var(--mut); font-size: 0.88rem; }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--tx);
+      padding: 7px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .tab-btn.active {
+      background: var(--acc);
+      color: #fff;
+      border-color: var(--acc);
+    }
+
+    main { max-width: 1120px; margin: 16px auto; padding: 0 14px 48px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+
+    input, select, textarea, button {
+      font-family: inherit;
+      font-size: 0.92rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--tx);
+      border-radius: 8px;
+      padding: 7px 10px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--tx);
+      border-radius: 8px;
+      padding: 7px 11px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: #f1f3f7; }
+    button.primary {
+      background: var(--acc);
+      color: #fff;
+      border-color: var(--acc);
+    }
+    button.primary:hover { opacity: 0.92; }
+    button.danger {
+      color: var(--bad-tx);
+      border-color: #fecaca;
+      background: var(--bad-bg);
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .card-title { font-weight: 700; font-size: 1rem; }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--bg);
+    }
+    .badge.ok { background: var(--ok-bg); color: var(--ok-tx); border-color: #bbf7d0; }
+    .badge.warn { background: var(--warn-bg); color: var(--warn-tx); border-color: #fde68a; }
+    .badge.bad { background: var(--bad-bg); color: var(--bad-tx); border-color: #fecaca; }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .meta-list {
+      font-size: 0.88rem;
+      display: grid;
+      gap: 3px;
+    }
+    .meta-list div span.lbl { color: var(--mut); }
+
+    .box-sep {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .comments-box {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--line);
+      font-size: 0.85rem;
+    }
+    .comment-item {
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: var(--bg);
+      margin-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+    .comment-item.ack { opacity: 0.7; }
+
+    .spool-form {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+    .spool-form .field { display: flex; flex-direction: column; gap: 4px; }
+    .spool-form label { font-size: 0.8rem; color: var(--mut); font-weight: 600; }
+
+    a { color: var(--acc); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-wrap">
+      <h1>Futura 3D</h1>
+      <span id="sheet-info" class="mut">Connexion…</span>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="orders">Commandes</button>
+      <button class="tab-btn" data-tab="spools">Bobines</button>
+      <button class="tab-btn" data-tab="tools">Outils &amp; Liens</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ONGLET COMMANDES -->
+    <section id="tab-orders" class="panel active">
+      <div class="toolbar">
+        <input id="q-search" type="text" placeholder="Rechercher client, objet, couleur…" style="min-width:210px" />
+        <select id="f-state">
+          <option value="">Tous les états</option>
+        </select>
+        <select id="f-mat">
+          <option value="">Toutes matières</option>
+          <option value="PLA">PLA</option>
+          <option value="PETG">PETG</option>
+          <option value="TPU">TPU</option>
+        </select>
+        <button id="btn-reload" type="button">Actualiser</button>
+        <span id="orders-count" class="mut"></span>
+      </div>
+      <div id="olist" class="grid-cards">Chargement…</div>
+    </section>
+
+    <!-- ONGLET BOBINES -->
+    <section id="tab-spools" class="panel">
+      <form id="spool-form" class="spool-form">
+        <input type="hidden" id="sp-id" />
+        <div class="field">
+          <label for="sp-brand">Marque</label>
+          <select id="sp-brand"></select>
+        </div>
+        <div class="field">
+          <label for="sp-mat">Matière</label>
+          <select id="sp-mat"></select>
+        </div>
+        <div class="field">
+          <label for="sp-color">Couleur</label>
+          <input id="sp-color" type="text" placeholder="ex. Noir, Rouge…" required />
+        </div>
+        <div class="field">
+          <label for="sp-init">Poids initial (g)</label>
+          <input id="sp-init" type="number" min="0" step="1" value="1000" required />
+        </div>
+        <div class="field">
+          <label for="sp-rem">Poids restant (g)</label>
+          <input id="sp-rem" type="number" min="0" step="1" placeholder="auto = initial" />
+        </div>
+        <div class="field">
+          <label for="sp-price">Prix (€)</label>
+          <input id="sp-price" type="number" min="0" step="0.01" placeholder="ex. 16.90" />
+        </div>
+        <div class="field">
+          <label for="sp-date">Date d’achat</label>
+          <input id="sp-date" type="date" />
+        </div>
+        <div class="field">
+          <label for="sp-note">Note</label>
+          <input id="sp-note" type="text" placeholder="optionnel" />
+        </div>
+        <div class="field" style="flex-direction:row;gap:6px">
+          <button type="submit" class="primary" id="sp-submit">Enregistrer</button>
+          <button type="button" id="sp-cancel">Annuler</button>
+        </div>
+      </form>
+
+      <div id="spools-summary" class="toolbar mut"></div>
+      <div id="slist" class="grid-cards">Chargement…</div>
+    </section>
+
+    <!-- ONGLET OUTILS & LIENS -->
+    <section id="tab-tools" class="panel">
+      <div class="card">
+        <div class="card-title">Configuration rapide (PayPal.Me &amp; Formulaire)</div>
+        <div class="mut">Paramètres enregistrés localement sur cet appareil pour générer les liens d’acompte (30 %) et le lien de votre formulaire client.</div>
+        <div class="box-sep">
+          <label class="mut" for="cfg-paypal">Base PayPal.Me :</label>
+          <input id="cfg-paypal" type="text" placeholder="https://paypal.me/VotrePseudo" style="min-width:240px" />
+          <label class="mut" for="cfg-form">URL Formulaire client :</label>
+          <input id="cfg-form" type="text" placeholder="https://votre-pseudo.github.io/futura3d/" style="min-width:260px" />
+          <button type="button" class="primary" id="btn-save-cfg">Sauvegarder</button>
+          <button type="button" id="btn-copy-form">Copier lien formulaire</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (sel, root = document) => root.querySelector(sel);
+
+    function h(tag, attrs = {}, children = []) {
+      const el = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (k === 'text') el.textContent = v;
+        else if (k === 'class') el.className = v;
+        else if (k === 'style') el.style.cssText = v;
+        else if (v !== false && v !== null && v !== undefined) el.setAttribute(k, v);
+      }
+      (Array.isArray(children) ? children : [children]).forEach(c => {
+        if (c === null || c === undefined || c === false) return;
+        el.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
+      });
+      return el;
+    }
+
+    function call(fn, ...args) {
+      return new Promise((resolve, reject) => {
+        if (!window.google || !google.script || !google.script.run) {
+          reject(new Error('Environnement Google Apps Script indisponible.'));
+          return;
+        }
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(err => reject(err || new Error('Erreur inconnue')))
+          [fn](...args);
+      });
+    }
+
+    const STORAGE_KEYS = {
+      paypal: 'futura3d_paypal_me_v1',
+      formUrl: 'futura3d_form_url_v1'
+    };
+
+    function getPaypalBase() {
+      return (localStorage.getItem(STORAGE_KEYS.paypal) || '').trim().replace(/\/+$/, '');
+    }
+    function getFormUrl() {
+      return (localStorage.getItem(STORAGE_KEYS.formUrl) || '').trim();
+    }
+
+    let stateData = {
+      orders: [],
+      states: ['DEMANDEE', 'VALIDEE', 'ACOMPTE RECU', 'IMPRIMEE', 'RECUE', 'ANNULEE'],
+      paymentMethods: ['Carte bancaire', 'PayPal', 'Virement', 'Espèces', 'Chèque', 'Autre'],
+      comments: {},
+      colors: {}
+    };
+
+    let spoolData = {
+      spools: [],
+      brands: [],
+      materials: [],
+      low: 150
+    };
+
+    function normColor(s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\s\-]+/g, ' ')
+        .trim();
+    }
+
+    function colorHex(name) {
+      const k = normColor(name);
+      return stateData.colors && stateData.colors[k] ? stateData.colors[k] : '';
+    }
+
+    function fmtEur(n) {
+      const num = Number(n);
+      if (isNaN(num)) return '—';
+      return num.toFixed(2).replace('.', ',') + ' €';
+    }
+
+    function computeSplit(rawTarif) {
+      const cleaned = String(rawTarif == null ? '' : rawTarif).replace(',', '.').trim();
+      if (cleaned === '') return null;
+      const t = parseFloat(cleaned);
+      if (isNaN(t) || t < 0) return null;
+      const acompte = Math.round(t * 0.30 * 100) / 100;
+      const solde = Math.round((t - acompte) * 100) / 100;
+      return { total: t, acompte, solde };
+    }
+
+    function spoolStatusForOrder(o) {
+      const mat = normColor(o.matiere);
+      const cols = (o.couleurs && o.couleurs.length ? o.couleurs : [o.couleur]).map(normColor).filter(Boolean);
+      const matching = spoolData.spools.filter(sp => {
+        const okMat = !mat || normColor(sp.material) === mat;
+        const okCol = !cols.length || cols.some(c => normColor(sp.color).indexOf(c) !== -1 || c.indexOf(normColor(sp.color)) !== -1);
+        return okMat && okCol;
+      });
+      if (!matching.length) {
+        return { cls: 'warn', txt: 'Bobine à vérifier' };
+      }
+      const totalGrams = matching.reduce((acc, s) => acc + (Number(s.remaining) || 0), 0);
+      if (totalGrams <= 0) {
+        return { cls: 'bad', txt: 'Stock épuisé (0 g)' };
+      }
+      if (totalGrams <= (spoolData.low || 150)) {
+        return { cls: 'warn', txt: 'Stock bas (' + totalGrams + ' g)' };
+      }
+      return { cls: 'ok', txt: 'Stock OK (' + totalGrams + ' g)' };
+    }
+
+    function buildBillingBox(o) {
+      const wrap = h('div', { class: 'box-sep' });
+
+      const inpTarif = h('input', {
+        type: 'number',
+        step: '0.50',
+        min: '0',
+        placeholder: 'Tarif (€)',
+        value: o.tarif !== '' && o.tarif !== undefined ? o.tarif : '',
+        style: 'width:105px'
+      });
+
+      const selPay = h('select');
+      selPay.appendChild(h('option', { value: '', text: 'Paiement…' }));
+      (stateData.paymentMethods || []).forEach(m => {
+        const opt = h('option', { value: m, text: m });
+        if (o.paiement === m) opt.selected = true;
+        selPay.appendChild(opt);
+      });
+
+      const recap = h('span', { class: 'mut', style: 'width:100%' });
+
+      function refreshRecap() {
+        const sp = computeSplit(inpTarif.value);
+        if (!sp) {
+          recap.textContent = 'Acompte 30 % : — · Solde 70 % : —' + (selPay.value ? ' · ' + selPay.value : '');
+          return;
+        }
+        recap.textContent =
+          'Acompte 30 % : ' + fmtEur(sp.acompte) +
+          ' · Solde 70 % : ' + fmtEur(sp.solde) +
+          (selPay.value ? ' · ' + selPay.value : '');
+      }
+      refreshRecap();
+      inpTarif.addEventListener('input', refreshRecap);
+      selPay.addEventListener('change', refreshRecap);
+
+      const btnSave = h('button', { type: 'button', class: 'primary', text: 'Enregistrer tarif' });
+      btnSave.addEventListener('click', () => {
+        btnSave.disabled = true;
+        call('updateOrderBilling', o.row, inpTarif.value, selPay.value)
+          .then(res => {
+            o.tarif = res.tarif;
+            o.acompte = res.acompte;
+            o.paiement = res.paiement;
+            refreshRecap();
+            btnSave.textContent = 'Enregistré ✓';
+            setTimeout(() => {
+              btnSave.textContent = 'Enregistrer tarif';
+              btnSave.disabled = false;
+            }, 1400);
+          })
+          .catch(err => {
+            alert(err && err.message ? err.message : String(err));
+            btnSave.disabled = false;
+          });
+      });
+
+      const btnCopyMsg = h('button', { type: 'button', text: 'Copier demande' });
+      btnCopyMsg.addEventListener('click', () => {
+        const sp = computeSplit(inpTarif.value);
+        if (!sp || sp.total <= 0) {
+          alert('Saisis d’abord un tarif supérieur à 0.');
+          return;
+        }
+        const base = getPaypalBase();
+        const paypalUrl = base ? `${base}/${sp.acompte.toFixed(2)}EUR` : '';
+        const mode = selPay.value || 'CB, PayPal ou virement';
+
+        const msg =
+          `Bonjour ${o.client || ''},\n` +
+          `Pour votre commande (${o.objet || 'impression 3D'}), le tarif est de ${fmtEur(sp.total)}.\n` +
+          `Un acompte de 30 % (${fmtEur(sp.acompte)}) est demandé pour lancer l'impression (solde de ${fmtEur(sp.solde)} à la remise).\n` +
+          `Moyen de règlement : ${mode}.` +
+          (paypalUrl ? `\nLien PayPal (acompte) : ${paypalUrl}` : '');
+
+        navigator.clipboard.writeText(msg).then(() => {
+          btnCopyMsg.textContent = 'Message copié ✓';
+          setTimeout(() => { btnCopyMsg.textContent = 'Copier demande'; }, 1400);
+        });
+      });
+
+      const btnPaypal = h('button', { type: 'button', text: 'Lien PayPal' });
+      btnPaypal.addEventListener('click', () => {
+        const base = getPaypalBase();
+        if (!base) {
+          alert('Renseigne d’abord ton lien PayPal.Me dans l’onglet « Outils & Liens ».');
+          return;
+        }
+        const sp = computeSplit(inpTarif.value);
+        if (!sp || sp.acompte <= 0) {
+          alert('Saisis d’abord un tarif pour calculer l’acompte de 30 %.');
+          return;
+        }
+        const url = `${base}/${sp.acompte.toFixed(2)}EUR`;
+        navigator.clipboard.writeText(url).then(() => {
+          btnPaypal.textContent = 'PayPal copié ✓';
+          setTimeout(() => { btnPaypal.textContent = 'Lien PayPal'; }, 1400);
+        });
+      });
+
+      wrap.append(inpTarif, selPay, btnSave, btnCopyMsg, btnPaypal, recap);
+      return wrap;
+    }
+
+    function buildCommentsBox(o) {
+      const box = h('div', { class: 'comments-box' });
+      const list = (stateData.comments && stateData.comments[o.key]) || [];
+
+      box.appendChild(h('div', { class: 'mut', text: 'Notes de production (' + list.length + ')' }));
+
+      list.forEach(c => {
+        const item = h('div', { class: 'comment-item' + (c.ack ? ' ack' : '') });
+        const txt = h('div', {}, [
+          h('div', { text: c.text }),
+          h('div', { class: 'mut', text: c.date + (c.ack ? ' · Pris en compte ' + c.ack : '') })
+        ]);
+        const btnAck = h('button', {
+          type: 'button',
+          text: c.ack ? 'Annuler OK' : 'OK'
+        });
+        btnAck.addEventListener('click', () => {
+          btnAck.disabled = true;
+          call('ackComment', c.id, !c.ack)
+            .then(val => {
+              c.ack = val;
+              renderOrders();
+            })
+            .catch(err => {
+              alert(err && err.message ? err.message : String(err));
+              btnAck.disabled = false;
+            });
+        });
+        item.append(txt, btnAck);
+        box.appendChild(item);
+      });
+
+      const addRow = h('div', { class: 'box-sep', style: 'border-top:none;padding-top:4px' });
+      const inp = h('input', { type: 'text', placeholder: 'Ajouter une note…', style: 'flex:1;min-width:140px' });
+      const btnAdd = h('button', { type: 'button', text: '+' });
+      btnAdd.addEventListener('click', () => {
+        const val = inp.value.trim();
+        if (!val) return;
+        btnAdd.disabled = true;
+        call('addComment', o.key, val)
+          .then(created => {
+            (stateData.comments[o.key] = stateData.comments[o.key] || []).push(created);
+            inp.value = '';
+            renderOrders();
+          })
+          .catch(err => {
+            alert(err && err.message ? err.message : String(err));
+            btnAdd.disabled = false;
+          });
+      });
+      addRow.append(inp, btnAdd);
+      box.appendChild(addRow);
+      return box;
+    }
+
+    function renderOrders() {
+      const container = $('#olist');
+      const q = normColor($('#q-search').value);
+      const stFilter = $('#f-state').value;
+      const matFilter = normColor($('#f-mat').value);
+
+      const filtered = (stateData.orders || []).filter(o => {
+        if (stFilter && o.etat !== stFilter) return false;
+        if (matFilter && normColor(o.matiere).indexOf(matFilter) === -1) return false;
+        if (q) {
+          const hay = normColor([o.client, o.objet, o.desc, o.couleur, o.matiere, o.remarque].join(' '));
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+
+      $('#orders-count').textContent = filtered.length + ' commande(s)';
+      container.innerHTML = '';
+
+      if (!filtered.length) {
+        container.appendChild(h('p', { class: 'mut', text: 'Aucune commande correspondante.' }));
+        return;
+      }
+
+      filtered.forEach(o => {
+        const card = h('article', { class: 'card' });
+
+        const top = h('div', { class: 'card-top' }, [
+          h('div', {}, [
+            h('div', { class: 'card-title', text: o.objet || 'Commande sans titre' }),
+            h('div', { class: 'mut', text: (o.client || 'Client inconnu') + (o.date ? ' · ' + o.date : '') })
+          ])
+        ]);
+
+        const selState = h('select');
+        selState.appendChild(h('option', { value: '', text: 'État…' }));
+        (stateData.states || []).forEach(st => {
+          const opt = h('option', { value: st, text: st });
+          if (o.etat === st) opt.selected = true;
+          selState.appendChild(opt);
+        });
+        selState.addEventListener('change', () => {
+          const prev = o.etat;
+          o.etat = selState.value;
+          call('updateOrderState', o.row, o.etat).catch(err => {
+            o.etat = prev;
+            selState.value = prev;
+            alert(err && err.message ? err.message : String(err));
+          });
+        });
+        top.appendChild(selState);
+        card.appendChild(top);
+
+        const badges = h('div', { class: 'badges' });
+        if (o.matiere) badges.appendChild(h('span', { class: 'badge', text: o.matiere }));
+        if (o.qte) badges.appendChild(h('span', { class: 'badge', text: 'Qté : ' + o.qte }));
+
+        const cols = o.couleurs && o.couleurs.length ? o.couleurs : (o.couleur ? [o.couleur] : []);
+        cols.forEach(c => {
+          const hex = colorHex(c);
+          const b = h('span', { class: 'badge' }, [
+            hex ? h('span', { class: 'swatch', style: 'background:' + hex }) : null,
+            h('span', { text: c })
+          ]);
+          badges.appendChild(b);
+        });
+
+        if (o.fit) {
+          const fitCls = o.fit.status === 'over' ? 'bad' : (o.fit.status === 'height_only' ? 'warn' : 'ok');
+          badges.appendChild(h('span', { class: 'badge ' + fitCls, text: o.fit.label }));
+        }
+
+        const spStatus = spoolStatusForOrder(o);
+        badges.appendChild(h('span', { class: 'badge ' + spStatus.cls, text: spStatus.txt }));
+
+        card.appendChild(badges);
+
+        const meta = h('div', { class: 'meta-list' });
+        if (o.contact) meta.appendChild(h('div', {}, [h('span', { class: 'lbl', text: 'Contact : ' }), document.createTextNode(o.contact)]));
+        if (o.taille) meta.appendChild(h('div', {}, [h('span', { class: 'lbl', text: 'Dimensions : ' }), document.createTextNode(o.taille)]));
+        if (o.desc && o.desc !== o.objet) meta.appendChild(h('div', {}, [h('span', { class: 'lbl', text: 'Détails : ' }), document.createTextNode(o.desc)]));
+        if (o.remarque) meta.appendChild(h('div', {}, [h('span', { class: 'lbl', text: 'Remarque : ' }), document.createTextNode(o.remarque)]));
+        if (o.lien) {
+          meta.appendChild(h('div', {}, [
+            h('span', { class: 'lbl', text: 'Modèle : ' }),
+            h('a', { href: o.lien, target: '_blank', rel: 'noopener', text: o.lien })
+          ]));
+        }
+        card.appendChild(meta);
+
+        card.appendChild(buildBillingBox(o));
+        card.appendChild(buildCommentsBox(o));
+        container.appendChild(card);
+      });
+    }
+
+    function populateFilters() {
+      const sel = $('#f-state');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">Tous les états</option>';
+      (stateData.states || []).forEach(st => {
+        const opt = h('option', { value: st, text: st });
+        if (st === cur) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function loadOrders() {
+      $('#olist').innerHTML = '';
+      $('#olist').appendChild(h('p', { class: 'mut', text: 'Chargement…' }));
+      call('listOrders')
+        .then(data => {
+          stateData = data || stateData;
+          $('#sheet-info').textContent = 'Onglet : ' + (stateData.sheet || 'Commandes Web');
+          populateFilters();
+          renderOrders();
+        })
+        .catch(err => {
+          $('#olist').innerHTML = '';
+          $('#olist').appendChild(h('p', { class: 'badge bad', text: 'Erreur : ' + (err && err.message ? err.message : String(err)) }));
+        });
+    }
+
+    /* ---------------- BOBINES ---------------- */
+    function initSpoolSelects() {
+      const bSel = $('#sp-brand');
+      const mSel = $('#sp-mat');
+      bSel.innerHTML = '';
+      mSel.innerHTML = '';
+      (spoolData.brands || ['Anycubic', 'eSun', 'Polyterra', 'Sunlu', 'Cailab']).forEach(b => {
+        bSel.appendChild(h('option', { value: b, text: b }));
+      });
+      (spoolData.materials || ['PLA', 'PETG', 'TPU']).forEach(m => {
+        mSel.appendChild(h('option', { value: m, text: m }));
+      });
+    }
+
+    function resetSpoolForm() {
+      $('#sp-id').value = '';
+      $('#sp-color').value = '';
+      $('#sp-init').value = '1000';
+      $('#sp-rem').value = '';
+      $('#sp-price').value = '';
+      $('#sp-date').value = '';
+      $('#sp-note').value = '';
+      $('#sp-submit').textContent = 'Enregistrer';
+    }
+
+    function renderSpools() {
+      const container = $('#slist');
+      container.innerHTML = '';
+      const list = spoolData.spools || [];
+      const totalGrams = list.reduce((acc, s) => acc + (Number(s.remaining) || 0), 0);
+      $('#spools-summary').textContent = list.length + ' bobine(s) · ' + totalGrams + ' g restants (seuil bas : ' + (spoolData.low || 150) + ' g)';
+
+      if (!list.length) {
+        container.appendChild(h('p', { class: 'mut', text: 'Aucune bobine enregistrée.' }));
+        return;
+      }
+
+      list.forEach(s => {
+        const isLow = (Number(s.remaining) || 0) <= (spoolData.low || 150);
+        const hex = colorHex(s.color);
+        const card = h('article', { class: 'card' });
+
+        card.appendChild(h('div', { class: 'card-top' }, [
+          h('div', {}, [
+            h('div', { class: 'card-title', text: (s.brand ? s.brand + ' · ' : '') + (s.material || '') + ' — ' + (s.color || '') }),
+            h('div', { class: 'mut', text: 'Restant : ' + s.remaining + ' g / ' + s.initial + ' g' + (s.price !== '' ? ' · ' + fmtEur(s.price) : '') })
+          ]),
+          h('span', { class: 'badge ' + (isLow ? 'warn' : 'ok'), text: isLow ? 'Stock bas' : 'OK' })
+        ]));
+
+        if (hex) {
+          card.appendChild(h('div', { class: 'badges' }, [
+            h('span', { class: 'swatch', style: 'background:' + hex }),
+            h('span', { class: 'mut', text: hex })
+          ]));
+        }
+        if (s.note) {
+          card.appendChild(h('div', { class: 'mut', text: s.note }));
+        }
+
+        const useRow = h('div', { class: 'box-sep' });
+        const inpGrams = h('input', { type: 'number', min: '1', step: '1', placeholder: 'g à retirer', style: 'width:105px' });
+        const btnUse = h('button', { type: 'button', text: 'Déduire g' });
+        btnUse.addEventListener('click', () => {
+          const g = Number(inpGrams.value);
+          if (!g || g <= 0) return;
+          btnUse.disabled = true;
+          call('useGrams', s.id, g)
+            .then(left => {
+              s.remaining = left;
+              renderSpools();
+              renderOrders();
+            })
+            .catch(err => {
+              alert(err && err.message ? err.message : String(err));
+              btnUse.disabled = false;
+            });
+        });
+
+        const btnEdit = h('button', { type: 'button', text: 'Modifier' });
+        btnEdit.addEventListener('click', () => {
+          $('#sp-id').value = s.id;
+          $('#sp-brand').value = s.brand;
+          $('#sp-mat').value = s.material;
+          $('#sp-color').value = s.color;
+          $('#sp-init').value = s.initial;
+          $('#sp-rem').value = s.remaining;
+          $('#sp-price').value = s.price;
+          $('#sp-date').value = s.bought;
+          $('#sp-note').value = s.note;
+          $('#sp-submit').textContent = 'Mettre à jour';
+        });
+
+        const btnDel = h('button', { type: 'button', class: 'danger', text: 'Suppr.' });
+        btnDel.addEventListener('click', () => {
+          if (!confirm('Supprimer cette bobine ?')) return;
+          call('deleteSpool', s.id).then(loadSpools).catch(err => alert(err.message || err));
+        });
+
+        useRow.append(inpGrams, btnUse, btnEdit, btnDel);
+        card.appendChild(useRow);
+        container.appendChild(card);
+      });
+    }
+
+    function loadSpools() {
+      call('listSpools')
+        .then(data => {
+          spoolData = data || spoolData;
+          initSpoolSelects();
+          renderSpools();
+        })
+        .catch(err => {
+          $('#slist').innerHTML = '';
+          $('#slist').appendChild(h('p', { class: 'badge bad', text: 'Erreur bobines : ' + (err && err.message ? err.message : String(err)) }));
+        });
+    }
+
+    $('#spool-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const payload = {
+        id: $('#sp-id').value.trim(),
+        brand: $('#sp-brand').value,
+        material: $('#sp-mat').value,
+        color: $('#sp-color').value.trim(),
+        initial: $('#sp-init').value,
+        remaining: $('#sp-rem').value,
+        price: $('#sp-price').value,
+        bought: $('#sp-date').value,
+        note: $('#sp-note').value.trim()
+      };
+      call('saveSpool', payload)
+        .then(() => {
+          resetSpoolForm();
+          loadSpools();
+        })
+        .catch(err => alert(err && err.message ? err.message : String(err)));
+    });
+    $('#sp-cancel').addEventListener('click', resetSpoolForm);
+
+    /* ---------------- ONGLETS & OUTILS ---------------- */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        $('#tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    $('#q-search').addEventListener('input', renderOrders);
+    $('#f-state').addEventListener('change', renderOrders);
+    $('#f-mat').addEventListener('change', renderOrders);
+    $('#btn-reload').addEventListener('click', () => {
+      loadOrders();
+      loadSpools();
+    });
+
+    $('#cfg-paypal').value = getPaypalBase();
+    $('#cfg-form').value = getFormUrl();
+    $('#btn-save-cfg').addEventListener('click', () => {
+      localStorage.setItem(STORAGE_KEYS.paypal, $('#cfg-paypal').value.trim());
+      localStorage.setItem(STORAGE_KEYS.formUrl, $('#cfg-form').value.trim());
+      alert('Paramètres enregistrés sur cet appareil.');
+    });
+    $('#btn-copy-form').addEventListener('click', () => {
+      const url = $('#cfg-form').value.trim();
+      if (!url) {
+        alert('Renseigne d’abord l’URL de ton formulaire (ex. GitHub Pages).');
+        return;
+      }
+      navigator.clipboard.writeText(url).then(() => alert('Lien du formulaire copié !'));
+    });
+
+    loadOrders();
+    loadSpools();
+  </script>
+</body>
+</html>
